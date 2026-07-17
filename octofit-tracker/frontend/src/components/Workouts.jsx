@@ -1,22 +1,25 @@
 import { useEffect, useState } from 'react';
-import { getApiBaseUrl } from '../utils/api';
+import { buildApiUrl, normalizeCollection } from '../utils/api';
 
 function Workouts() {
   const [workouts, setWorkouts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const loadWorkouts = async () => {
       try {
-        const response = await fetch(`${getApiBaseUrl()}/api/workouts/`);
+        const response = await fetch(buildApiUrl('/workouts/'));
         if (!response.ok) {
-          throw new Error('Unable to load workouts');
+          throw new Error(`Request failed with status ${response.status}`);
         }
+
         const payload = await response.json();
-        const items = Array.isArray(payload) ? payload : payload.workouts ?? payload.results ?? [];
-        setWorkouts(items);
+        setWorkouts(normalizeCollection(payload, 'workouts'));
       } catch (err) {
-        setError(err.message || 'Unable to load workouts');
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -24,16 +27,36 @@ function Workouts() {
   }, []);
 
   return (
-    <section>
-      <h2>Workouts</h2>
-      {error ? <p className="text-danger">{error}</p> : null}
-      <ul className="list-group">
-        {workouts.map((workout) => (
-          <li className="list-group-item" key={workout._id || workout.name}>
-            <strong>{workout.name}</strong> — {workout.category} ({workout.durationMinutes} min, {workout.difficulty})
-          </li>
-        ))}
-      </ul>
+    <section className="card shadow-sm">
+      <div className="card-body">
+        <h2 className="h4 mb-3">Suggested workouts</h2>
+        {loading && <p className="text-muted">Loading workouts…</p>}
+        {error && <div className="alert alert-danger">{error}</div>}
+        {!loading && !error && (
+          <div className="table-responsive">
+            <table className="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Duration</th>
+                  <th>Difficulty</th>
+                </tr>
+              </thead>
+              <tbody>
+                {workouts.map((workout) => (
+                  <tr key={workout.name}>
+                    <td>{workout.name}</td>
+                    <td>{workout.category}</td>
+                    <td>{workout.durationMinutes} min</td>
+                    <td>{workout.difficulty}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </section>
   );
 }

@@ -1,22 +1,25 @@
 import { useEffect, useState } from 'react';
-import { getApiBaseUrl } from '../utils/api';
+import { buildApiUrl, normalizeCollection } from '../utils/api';
 
 function Teams() {
   const [teams, setTeams] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const loadTeams = async () => {
       try {
-        const response = await fetch(`${getApiBaseUrl()}/api/teams/`);
+        const response = await fetch(buildApiUrl('/teams/'));
         if (!response.ok) {
-          throw new Error('Unable to load teams');
+          throw new Error(`Request failed with status ${response.status}`);
         }
+
         const payload = await response.json();
-        const items = Array.isArray(payload) ? payload : payload.teams ?? payload.results ?? [];
-        setTeams(items);
+        setTeams(normalizeCollection(payload, 'teams'));
       } catch (err) {
-        setError(err.message || 'Unable to load teams');
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -24,16 +27,34 @@ function Teams() {
   }, []);
 
   return (
-    <section>
-      <h2>Teams</h2>
-      {error ? <p className="text-danger">{error}</p> : null}
-      <ul className="list-group">
-        {teams.map((team) => (
-          <li className="list-group-item" key={team._id || team.name}>
-            <strong>{team.name}</strong> — {team.focus} ({team.members?.join(', ') || 'No members'})
-          </li>
-        ))}
-      </ul>
+    <section className="card shadow-sm">
+      <div className="card-body">
+        <h2 className="h4 mb-3">Teams</h2>
+        {loading && <p className="text-muted">Loading teams…</p>}
+        {error && <div className="alert alert-danger">{error}</div>}
+        {!loading && !error && (
+          <div className="table-responsive">
+            <table className="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Focus</th>
+                  <th>Members</th>
+                </tr>
+              </thead>
+              <tbody>
+                {teams.map((team) => (
+                  <tr key={team.name}>
+                    <td>{team.name}</td>
+                    <td>{team.focus}</td>
+                    <td>{team.members?.join(', ')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </section>
   );
 }

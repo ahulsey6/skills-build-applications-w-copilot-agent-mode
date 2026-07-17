@@ -1,22 +1,25 @@
 import { useEffect, useState } from 'react';
-import { getApiBaseUrl } from '../utils/api';
+import { buildApiUrl, normalizeCollection } from '../utils/api';
 
 function Users() {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const loadUsers = async () => {
       try {
-        const response = await fetch(`${getApiBaseUrl()}/api/users/`);
+        const response = await fetch(buildApiUrl('/users/'));
         if (!response.ok) {
-          throw new Error('Unable to load users');
+          throw new Error(`Request failed with status ${response.status}`);
         }
+
         const payload = await response.json();
-        const items = Array.isArray(payload) ? payload : payload.users ?? payload.results ?? [];
-        setUsers(items);
+        setUsers(normalizeCollection(payload, 'users'));
       } catch (err) {
-        setError(err.message || 'Unable to load users');
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -24,16 +27,34 @@ function Users() {
   }, []);
 
   return (
-    <section>
-      <h2>Users</h2>
-      {error ? <p className="text-danger">{error}</p> : null}
-      <ul className="list-group">
-        {users.map((user) => (
-          <li className="list-group-item" key={user._id || user.email || user.name}>
-            <strong>{user.name}</strong> — {user.email} ({user.fitnessLevel || 'unknown'})
-          </li>
-        ))}
-      </ul>
+    <section className="card shadow-sm">
+      <div className="card-body">
+        <h2 className="h4 mb-3">Members</h2>
+        {loading && <p className="text-muted">Loading users…</p>}
+        {error && <div className="alert alert-danger">{error}</div>}
+        {!loading && !error && (
+          <div className="table-responsive">
+            <table className="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Fitness level</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user.email}>
+                    <td>{user.name}</td>
+                    <td>{user.email}</td>
+                    <td>{user.fitnessLevel}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </section>
   );
 }
