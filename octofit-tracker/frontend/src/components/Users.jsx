@@ -17,7 +17,7 @@ function Users() {
         const payload = await response.json();
         setUsers(normalizeCollection(payload, 'users'));
       } catch (err) {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Unable to load users');
       } finally {
         setLoading(false);
       }
@@ -43,11 +43,11 @@ function Users() {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
-                  <tr key={user.email}>
-                    <td>{user.name}</td>
-                    <td>{user.email}</td>
-                    <td>{user.fitnessLevel}</td>
+                {users.map((user, index) => (
+                  <tr key={`${user.email || user.name || 'user'}-${index}`}>
+                    <td>{user.name || 'Unknown user'}</td>
+                    <td>{user.email || '—'}</td>
+                    <td>{user.fitnessLevel || user.fitness || '—'}</td>
                   </tr>
                 ))}
               </tbody>

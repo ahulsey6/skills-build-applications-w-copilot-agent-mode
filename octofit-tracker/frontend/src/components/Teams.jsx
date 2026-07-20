@@ -17,7 +17,7 @@ function Teams() {
         const payload = await response.json();
         setTeams(normalizeCollection(payload, 'teams'));
       } catch (err) {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Unable to load teams');
       } finally {
         setLoading(false);
       }
@@ -43,11 +43,11 @@ function Teams() {
                 </tr>
               </thead>
               <tbody>
-                {teams.map((team) => (
-                  <tr key={team.name}>
-                    <td>{team.name}</td>
-                    <td>{team.focus}</td>
-                    <td>{team.members?.join(', ')}</td>
+                {teams.map((team, index) => (
+                  <tr key={`${team.name || team.id || 'team'}-${index}`}>
+                    <td>{team.name || 'Unnamed team'}</td>
+                    <td>{team.focus || '—'}</td>
+                    <td>{Array.isArray(team.members) ? team.members.join(', ') : team.members || '—'}</td>
                   </tr>
                 ))}
               </tbody>

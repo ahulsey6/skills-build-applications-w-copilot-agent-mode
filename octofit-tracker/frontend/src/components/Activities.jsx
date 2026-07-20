@@ -17,7 +17,7 @@ function Activities() {
         const payload = await response.json();
         setActivities(normalizeCollection(payload, 'activities'));
       } catch (err) {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Unable to load activities');
       } finally {
         setLoading(false);
       }
@@ -44,12 +44,12 @@ function Activities() {
                 </tr>
               </thead>
               <tbody>
-                {activities.map((activity) => (
-                  <tr key={`${activity.userName}-${activity.type}-${activity.durationMinutes}`}>
-                    <td>{activity.userName}</td>
-                    <td>{activity.type}</td>
-                    <td>{activity.durationMinutes} min</td>
-                    <td>{activity.calories}</td>
+                {activities.map((activity, index) => (
+                  <tr key={`${activity.userName || activity.user || 'activity'}-${activity.type || 'type'}-${index}`}>
+                    <td>{activity.userName || activity.user || 'Unknown user'}</td>
+                    <td>{activity.type || 'Unknown'}</td>
+                    <td>{activity.durationMinutes ?? activity.duration ?? '—'} min</td>
+                    <td>{activity.calories ?? '—'}</td>
                   </tr>
                 ))}
               </tbody>

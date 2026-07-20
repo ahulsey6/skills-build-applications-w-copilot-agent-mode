@@ -7,6 +7,11 @@ import Workouts from './components/Workouts';
 import './App.css';
 
 function AppShell() {
+  const codespaceName = import.meta.env?.VITE_CODESPACE_NAME?.trim();
+  const apiHint = codespaceName
+    ? `Using Codespaces API host for ${codespaceName}`
+    : 'Set VITE_CODESPACE_NAME in .env.local to use the Codespaces API URL.';
+
   return (
     <div className="container py-4">
       <header className="mb-4">
@@ -19,19 +24,27 @@ function AppShell() {
             </p>
           </div>
           <div className="alert alert-info mb-0 py-2 px-3">
-            <small>
-              Set VITE_CODESPACE_NAME in .env.local to use the Codespaces API URL.
-            </small>
+            <small>{apiHint}</small>
           </div>
         </div>
       </header>
 
       <nav className="nav nav-pills flex-wrap mb-4">
-        <NavLink className="nav-link" to="/">Members</NavLink>
-        <NavLink className="nav-link" to="/teams">Teams</NavLink>
-        <NavLink className="nav-link" to="/activities">Activities</NavLink>
-        <NavLink className="nav-link" to="/leaderboard">Leaderboard</NavLink>
-        <NavLink className="nav-link" to="/workouts">Workouts</NavLink>
+        <NavLink className="nav-link" to="/">
+          Members
+        </NavLink>
+        <NavLink className="nav-link" to="/teams">
+          Teams
+        </NavLink>
+        <NavLink className="nav-link" to="/activities">
+          Activities
+        </NavLink>
+        <NavLink className="nav-link" to="/leaderboard">
+          Leaderboard
+        </NavLink>
+        <NavLink className="nav-link" to="/workouts">
+          Workouts
+        </NavLink>
       </nav>
 
       <Routes>

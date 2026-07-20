@@ -17,7 +17,7 @@ function Workouts() {
         const payload = await response.json();
         setWorkouts(normalizeCollection(payload, 'workouts'));
       } catch (err) {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Unable to load workouts');
       } finally {
         setLoading(false);
       }
@@ -44,12 +44,12 @@ function Workouts() {
                 </tr>
               </thead>
               <tbody>
-                {workouts.map((workout) => (
-                  <tr key={workout.name}>
-                    <td>{workout.name}</td>
-                    <td>{workout.category}</td>
-                    <td>{workout.durationMinutes} min</td>
-                    <td>{workout.difficulty}</td>
+                {workouts.map((workout, index) => (
+                  <tr key={`${workout.name || workout.id || 'workout'}-${index}`}>
+                    <td>{workout.name || 'Unnamed workout'}</td>
+                    <td>{workout.category || '—'}</td>
+                    <td>{workout.durationMinutes ?? workout.duration ?? '—'} min</td>
+                    <td>{workout.difficulty || '—'}</td>
                   </tr>
                 ))}
               </tbody>

@@ -17,7 +17,7 @@ function Leaderboard() {
         const payload = await response.json();
         setEntries(normalizeCollection(payload, 'leaderboard'));
       } catch (err) {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Unable to load leaderboard');
       } finally {
         setLoading(false);
       }
@@ -44,12 +44,12 @@ function Leaderboard() {
               </thead>
               <tbody>
                 {entries.map((entry, index) => (
-                  <tr key={`${entry.userName}-${entry.totalPoints}`}>
+                  <tr key={`${entry.userName || entry.user || 'entry'}-${entry.totalPoints ?? index}`}>
                     <td>
-                      #{index + 1} {entry.userName}
+                      #{index + 1} {entry.userName || entry.user || 'Unknown user'}
                     </td>
-                    <td>{entry.totalPoints}</td>
-                    <td>{entry.streak} days</td>
+                    <td>{entry.totalPoints ?? entry.points ?? '—'}</td>
+                    <td>{entry.streak ?? entry.streakDays ?? '—'} days</td>
                   </tr>
                 ))}
               </tbody>
